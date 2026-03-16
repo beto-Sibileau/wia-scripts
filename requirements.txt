@@ -1,19 +1,56 @@
+# =====================================================================
+# Requirements — unified geospatial + flood analysis environment
+# =====================================================================
+# Install: pip install --user -r requirements.txt
+#
+# Organisation: grouped by purpose, alphabetical within each group.
+# Pin style: no pin for flexibility in a dev environment;
+# switch to exact pins (==) if reproducibility across
+# machines becomes critical (or use pip-compile / uv lock).
+# =====================================================================
+
+# --- Core geospatial --------------------------------------------------
 geopandas
 geopy
-requests
-openpyxl
-pycountry
-plotly
-exactextract
-rasterio
 Fiona
-kaleido
-geojson-rewind
-pyquadkey2
-cdsapi
+pyproj
+rasterio
+rioxarray
+shapely
+
+# --- Array / computation ---------------------------------------------
+numpy
 xarray[io]
-ipykernel
+dask[distributed]
+
+# --- STAC data access (GFM flood extraction) --------------------------
+odc-stac
+pystac-client
+
+# --- Climate / weather data -------------------------------------------
+cdsapi
+
+# --- Zonal statistics -------------------------------------------------
+exactextract
+
+# --- Visualisation ----------------------------------------------------
+plotly
+kaleido
 matplotlib
 seaborn
-python-dotenv
+
+# --- Tabular I/O -----------------------------------------------------
+openpyxl
+
+# --- Utilities --------------------------------------------------------
+geojson-rewind
 nbformat
+pycountry
+python-dateutil
+python-dotenv
+pyquadkey2
+requests
+tqdm
+
+# --- Jupyter / notebook kernel ----------------------------------------
+ipykernel
