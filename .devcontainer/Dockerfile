@@ -52,9 +52,9 @@ ENV GDAL_HTTP_MERGE_CONSECUTIVE_RANGES=YES \
     GDAL_HTTP_VERSION=2 \
     GDAL_DISABLE_READDIR_ON_OPEN=EMPTY_DIR \
     VSI_CACHE=TRUE \
-    VSI_CACHE_SIZE=5000000 \
+    VSI_CACHE_SIZE=1000000 \
     CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.tiff" \
-    CPL_VSIL_CURL_CACHE_SIZE=200000000
+    CPL_VSIL_CURL_CACHE_SIZE=50000000
 	
 # ── Dask memory management defaults ─────────────────────────────────
 # Conservative thresholds for a 32 GB laptop running Docker.

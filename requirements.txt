@@ -33,11 +33,12 @@ cdsapi
 # --- Zonal statistics -------------------------------------------------
 exactextract
 
-# --- Visualisation ----------------------------------------------------
+# --- Visualisation (+bokeh for dask) ----------------------------------
 plotly
 kaleido
 matplotlib
 seaborn
+bokeh
 
 # --- Tabular I/O -----------------------------------------------------
 openpyxl
