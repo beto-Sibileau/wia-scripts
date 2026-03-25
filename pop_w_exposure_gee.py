@@ -646,6 +646,7 @@ for csv_path in sorted(glob.glob(f"{hazard_folder}/*.csv")):
     # Hazard metadata
     df["hazard_name"] = cfg["name"]
     df["nodata_means_zero"] = cfg["nodata_means_zero"]
+    df["comparison"] = cfg["comparison"]
 
     # ── Handle division edge cases (0 pop → NaN is correct) ──
     # NaN weighted average when no population → leave as-is (means no people)
