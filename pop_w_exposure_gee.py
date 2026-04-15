@@ -120,7 +120,8 @@ ee.Initialize(project='unicef-ccri')
 # =========================================================================
 
 # --- Admin boundaries ---
-id_name = 'adm1_pcode'
+id_name = 'adm1_pcode'      # column name in output CSVs
+gee_id_field = 'adm1_pcode' # property name in the GEE FeatureCollection asset
 parent_id = ''
 admin_asset_id = "projects/unicef-ccri/assets/misc_boundaries/GRD_adm1"
 admin_fc = ee.FeatureCollection(admin_asset_id)
@@ -442,7 +443,9 @@ run_log = {
 
     "admin_boundaries": {
         "asset_id": admin_asset_id,
-        "id_field": id_name,
+        "gee_id_field": gee_id_field,
+        "output_id_field": id_name,
+        "id_field_renamed": gee_id_field != id_name,
         "n_features": n_features,
     },
 
@@ -541,13 +544,13 @@ for cfg in hazard_layers:
     )
 
     # ── Build the list of output columns ──
-    # Properties inherited from admin_fc (id_name, e.g. ADM1_CODE) are
+    # Properties inherited from admin_fc (gee_id_field, e.g. ADM1_CODE) are
     # automatically carried through by reduceRegions.
     band_names = ["hp", "p_both", "p_total"]
     for th_def in cfg["thresholds"]:
         band_names.append(f"exp_{th_def['label']}")
 
-    selectors = [id_name] + band_names
+    selectors = [gee_id_field] + band_names
 
     task = ee.batch.Export.table.toDrive(
         collection=result_fc,
@@ -598,7 +601,9 @@ cfg_lookup = {cfg["name"]: cfg for cfg in hazard_layers if not cfg.get("_skip")}
 all_frames = []
 
 for csv_path in sorted(glob.glob(f"{hazard_folder}/*.csv")):
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path).rename(
+        columns={gee_id_field: id_name}
+    )
 
     # Identify which hazard this file belongs to, from the filename
     basename = os.path.basename(csv_path).replace(f"_{suffix}.csv", "")
