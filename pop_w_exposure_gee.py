@@ -181,6 +181,7 @@ hazard_layers = [
         "comparison": "gt",
         "thresholds": [
             {"type": "absolute", "value": 0.01, "label": "abs"},
+            {"type": "country_mean", "label": "cmean"},
         ],
     },
     {
@@ -201,6 +202,7 @@ hazard_layers = [
         "comparison": "gt",
         "thresholds": [
             {"type": "absolute", "value": 17.5, "label": "abs"},
+            {"type": "country_mean", "label": "cmean"},
         ],
     },
     {
@@ -275,6 +277,7 @@ hazard_layers = [
         "comparison": "gt",
         "thresholds": [
             {"type": "absolute", "value": 35, "label": "abs"},
+            {"type": "country_mean", "label": "cmean"},
         ],
     },
     {
@@ -305,6 +308,7 @@ hazard_layers = [
         "comparison": "gt",
         "thresholds": [
             {"type": "absolute", "value": 0.01, "label": "abs"},
+            {"type": "country_mean", "label": "cmean"},
         ],
     },
     {
@@ -315,6 +319,7 @@ hazard_layers = [
         "comparison": "gt",
         "thresholds": [
             {"type": "absolute", "value": 0.09, "label": "abs"},
+            {"type": "country_mean", "label": "cmean"},
         ],
     },
     {
@@ -325,6 +330,7 @@ hazard_layers = [
         "comparison": "lt",
         "thresholds": [
             {"type": "absolute", "value": 100, "label": "abs"},
+            {"type": "country_mean", "label": "cmean"},
         ],
     },
 ]
