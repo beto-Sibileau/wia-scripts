@@ -27,7 +27,7 @@
 				"ms-python.black-formatter",
 				"charliermarsh.ruff",
 				"ms-python.vscode-pylance",
-				"github.copilot"
+				"anthropic.claude-code"
 			]
 		}
 	},
