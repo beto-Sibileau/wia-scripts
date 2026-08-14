@@ -120,10 +120,10 @@ ee.Initialize(project='unicef-ccri')
 # =========================================================================
 
 # --- Admin boundaries ---
-id_name = 'adm2_pcode'      # column name in output CSVs
-gee_id_field = 'adm2_pcode' # property name in the GEE FeatureCollection asset
-parent_id = 'adm1_pcode'
-admin_asset_id = "projects/unicef-ccri/assets/misc_boundaries/UKR_adm2"
+id_name = 'adm3_pcode'      # column name in output CSVs
+gee_id_field = 'adm3_pcode' # property name in the GEE FeatureCollection asset
+parent_id = 'adm2_pcode'
+admin_asset_id = "projects/unicef-ccri/assets/misc_boundaries/Lebanon_adm3"
 admin_fc = ee.FeatureCollection(admin_asset_id)
 
 # Filter for conflicted admin parents (if provided)
@@ -133,7 +133,7 @@ admin_fc = admin_fc.filter(
 ) if parent_id else admin_fc
 
 country_geom = admin_fc.geometry()
-suffix = 'ukr_adm2'
+suffix = 'lbn_adm3'
 output_folder = f'{suffix}_exposure_wavg'
 
 # --- Population ---
@@ -217,26 +217,6 @@ hazard_layers = [
         ],
     },
     {
-        "asset_id": "projects/unicef-ccri/assets/hazards/drought_spi_copernicus_1940_2024",
-        "name": "drought_spi_copernicus_1940-2024",
-        "is_collection": False,
-        "nodata_means_zero": False,
-        "comparison": "lt",
-        "thresholds": [
-            {"type": "absolute", "value": -1.5, "label": "abs"},
-        ],
-    },
-    {
-        "asset_id": "projects/unicef-ccri/assets/hazards/drought_spei_copernicus_1940_2024",
-        "name": "drought_spei_copernicus_1940-2024",
-        "is_collection": False,
-        "nodata_means_zero": False,
-        "comparison": "lt",
-        "thresholds": [
-            {"type": "absolute", "value": -1.5, "label": "abs"},
-        ],
-    },
-    {
         "asset_id": "projects/unicef-ccri/assets/droughts/spi12_TerraClimate_1958-2025",
         "name": "drought_spi_terraclimate_1958-2025",
         "is_collection": False,
@@ -298,7 +278,7 @@ hazard_layers = [
         "nodata_means_zero": False,
         "comparison": "gt",
         "thresholds": [
-            {"type": "absolute", "value": 35, "label": "abs"},
+            {"type": "global_mean", "label": "gmean"},
             {"type": "country_mean", "label": "cmean"},
         ],
     },
