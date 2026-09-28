@@ -22,6 +22,7 @@ shapely
 numpy
 xarray[io]
 dask[distributed]
+numba   # not used but imported by prec-index repo for larger ops
 
 # --- STAC data access (GFM flood extraction) --------------------------
 odc-stac
@@ -55,3 +56,4 @@ tqdm
 
 # --- Jupyter / notebook kernel ----------------------------------------
 ipykernel
+papermill
