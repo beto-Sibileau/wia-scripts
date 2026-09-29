@@ -51,6 +51,9 @@ CONFIGS = [
     RunConfig("Yemen", 2),
 ]
 
+NOTEBOOK_EXT = "SPEI_impact.ipynb"
+NOTEBOOK_POST = "postprocess_SPEI.ipynb"
+
 # minimum admin level per country, fine for small lists O(n²)
 # allows extractions using the lowest admin level in country shapes load
 mins = {
@@ -58,22 +61,44 @@ mins = {
     for country in {c.country for c in CONFIGS}
 }
 
-NOTEBOOK_EXT = "SPEI_impact.ipynb"
-NOTEBOOK_POST = "postprocess_SPEI.ipynb"
 
+def run_notebook(phase: str, notebook: str, country: str, admin_level: int) -> bool:
+    """Execute one notebook with papermill, print the outcome, return success.
 
-def run_notebook(notebook: str, country: str, admin_level: int) -> None:
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        scratch_path = Path(tmp_dir) / f"executed_{notebook}"
-        pm.execute_notebook(
-            notebook,
-            str(scratch_path),
-            parameters={"country": country, "admin_level": admin_level},
-            progress_bar=False,
+    All START / DONE / FAILED reporting lives here, so both phases share the
+    same error handling. Returns True if the run succeeded, False otherwise.
+    """
+    label = f"{country}, L{admin_level}"
+    print(f"[START {phase}] {label}")
+
+    try:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            scratch_path = Path(tmp_dir) / f"executed_{notebook}"
+            pm.execute_notebook(
+                notebook,
+                str(scratch_path),
+                parameters={"country": country, "admin_level": admin_level},
+                progress_bar=False,
+            )
+    except PapermillExecutionError as e:
+        print(
+            f"[FAILED {phase}] {label} — {notebook}, "
+            f"cell #{e.cell_index}: {e.ename}: {e.evalue}"
         )
+        return False
+    except Exception as e:
+        print(f"[FAILED {phase}] {label} — {notebook}, {type(e).__name__}: {e}")
+        return False
+
+    print(f"[DONE {phase}] {label}")
+    return True
 
 
 def main() -> None:
+    # Defined up-front so Phase 2 also works when extraction is switched off
+    # (NOTEBOOK_EXT empty/None): no country is then considered failed.
+    failed_countries = set()
+
     # ==========================================
     # PHASE 1: Extraction (Once per unique country)
     # notebook load admin_level shapes but extraction is raster-based
@@ -81,51 +106,25 @@ def main() -> None:
     if NOTEBOOK_EXT:
         print("--- PHASE 1: Running Extraction Notebooks ---")
 
-        failed_countries = set()
         # the mins keys become the unique countries in CONFIGS
         for country in sorted(mins.keys()):
-            print(f"[START EXTRACTION] {country}")
-            try:
-                run_notebook(NOTEBOOK_EXT, country, mins[country])
-            except PapermillExecutionError as e:
-                print(
-                    f"[FAILED EXTRACTION] {country} — {NOTEBOOK_EXT}, "
-                    f"cell #{e.cell_index}: {e.ename}: {e.evalue}"
-                )
+            if not run_notebook("EXTRACTION", NOTEBOOK_EXT, country, mins[country]):
                 failed_countries.add(country)
-            except Exception as e:
-                print(
-                    f"[FAILED EXTRACTION] {country} — {NOTEBOOK_EXT}, "
-                    f"{type(e).__name__}: {e}"
-                )
-                failed_countries.add(country)
-            else:
-                print(f"[DONE EXTRACTION] {country} — {NOTEBOOK_EXT}")
 
     # ==========================================
     # PHASE 2: Postprocess (Run for every country/admin_level combo)
     # ==========================================
     print("\n--- PHASE 2: Running Postprocess Notebooks ---")
+
     for config in CONFIGS:
         # Skip postprocessing if country extraction failed
         if config.country in failed_countries:
-            print(f"[SKIP POST]   {config.country} Extraction failed")
+            print(
+                f"[SKIP POST] {config.country}, L{config.admin_level} — extraction failed"
+            )
             continue
 
-        print(f"[START POST]  {config.country}, L{config.admin_level}")
-        try:
-            run_notebook(NOTEBOOK_POST, config.country, config.admin_level)
-            print(f"[DONE POST]   {config.country}, L{config.admin_level}")
-        except PapermillExecutionError as e:
-            print(
-                f"[FAILED POST] {config.country}, L{config.admin_level}, "
-                f"cell #{e.cell_index}: {e.ename}: {e.evalue}"
-            )
-        except Exception as e:
-            print(
-                f"[FAILED POST] {config.country}, L{config.admin_level}, "
-                f"{type(e).__name__}: {e}"
-            )
+        run_notebook("POST", NOTEBOOK_POST, config.country, config.admin_level)
 
 
 if __name__ == "__main__":
