@@ -1,0 +1,9 @@
+# cod_ab_geosight (in addition to / already in the wia-scripts requirements)
+geopandas>=1.0
+pyogrio
+pandas
+numpy
+scipy
+shapely>=2.0
+pyyaml
+requests

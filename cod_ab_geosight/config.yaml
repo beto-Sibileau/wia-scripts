@@ -1,0 +1,122 @@
+# =====================================================================
+# COD-AB harmonization for GeoSight (WIA countries): run configuration
+# =====================================================================
+# Paths are relative to the folder of this file (cod_ab_geosight/).
+# Run from the wia-scripts folder:
+#   python -m cod_ab_geosight                      (this config)
+#   python -m cod_ab_geosight --config other.yaml  (another config)
+# or in a notebook:
+#   from cod_ab_geosight import run; result = run()
+# =====================================================================
+
+paths:
+  # Zipped reference geojsons that drive the run ("retrieved config"):
+  # files named geojson_{ISO3}_adm{i}*.zip, top level of the folder only.
+  # One country per file; if several files for a country, the highest
+  # admin level is used (flagged).
+  config_geojsons: ../data_in/geo_sight/cod_shapes
+
+  # HDX COD-AB shapefile zips ("shp-folder"), flat, one zip per country,
+  # file name starting with the iso3 (e.g. afg_admin_boundaries.shp.zip,
+  # col-administrative-divisions-shapefiles.zip).
+  hdx_shp_zip: ../data_in/geo_sight/cod_shapes/hdx_shp_zip
+
+  # Global P-codes list (HDX dataset "global-pcodes", CSV resource).
+  # With download_all the file is downloaded into this file's folder.
+  global_pcodes: ../data_in/global_pcodes.csv
+
+  # Outputs: harmonized zip + geopackage, reports/ and logs/
+  output: ../data_out/geo_sight/cod_ab_harmonized
+
+run:
+  # false: use the zips already in hdx_shp_zip; countries in the config
+  #        without a zip are flagged and skipped.
+  # true:  first download from HDX the COD-AB zip of every config country
+  #        and the global P-codes CSV (files with the same name are
+  #        overwritten); access dates become today (per-country
+  #        access_date overrides are then ignored).
+  download_all: false
+
+  # Access date written in the Source field when download_all is false
+  # (YYYY-MM-DD); a country can override it with access_date (below).
+  default_access_date: "2026-10-14"
+
+  # Access date of the global P-codes file (null: default_access_date).
+  global_pcodes_access_date: null
+
+  # P-codes kept at the target admin level of each country:
+  #   global:    only P-codes present in the global P-codes list (default)
+  #   shapefile: all P-codes of the HDX shapefile
+  # Mismatches are always reported both ways; per-country override below.
+  pcode_master: global
+
+  # Compare the harmonized target level against the config geojson.
+  compare_shapes: true
+
+output:
+  # -> <name>_shp.zip with <name>_admin{i}.shp (all levels in one zip)
+  # -> <name>.gpkg with layers admin{i} (same attributes)
+  name: wia_cod_ab
+  write_gpkg: true
+
+compare:
+  # Thresholds of the shape comparison (as in compare_simplified_*.ipynb)
+  iou_threshold: 0.90        # min intersection over union (1 to 1 matches)
+  area_ratio_tol: 0.10       # max relative area difference (1 to 1 matches)
+  edge_min_frac: 0.05        # min overlap (fraction of smaller unit) to link units
+  boundary_shift_frac: 0.15  # overlaps below this (both units) = boundary shift
+  equal_area_crs: "EPSG:6933"
+  max_rows: 10               # rows per relation printed in the log
+
+# ---------------------------------------------------------------------
+# Source column (HDX shapefile) feeding each output field.
+# {i}: admin level of the file, {p}: parent level (i - 1).
+# Prnt_Pcode is left blank at admin 0; ISO3 and Source are added by the
+# flow. Exact column names (case sensitive); if a column is missing the
+# country is skipped and the columns found are printed.
+# ---------------------------------------------------------------------
+fields:
+  Pcode: "adm{i}_pcode"
+  Prnt_Pcode: "adm{p}_pcode"
+  Name: "adm{i}_name"
+  Language: "lang"
+  Version: "version"
+  Valid_on: "valid_on"
+
+# ---------------------------------------------------------------------
+# Per-country exceptions (only what differs from the defaults above):
+#   fields:       output field -> source column, all levels
+#   constants:    value for Language / Version / Valid_on, used only if
+#                 the source column is missing in the shapefile
+#   levels:       {level: {fields: ..., constants: ...}} for one level
+#                 (takes precedence over the country-wide settings)
+#   access_date:  date the zip in hdx_shp_zip was downloaded, if it
+#                 differs from default_access_date (e.g. an older file
+#                 put there by hand to match the WIA geojson)
+#   pcode_master: global | shapefile (target level only)
+# ---------------------------------------------------------------------
+countries:
+  CMR:
+    levels:
+      2:
+        fields:
+          Name: adm2_ref_n    # adm2_name empty in the HDX file (Oct 2026)
+
+  # COL: the 2020 file has upper-case columns and no lang / version columns;
+  # check the values on HDX if enabled.
+  COL:
+    fields:
+      Pcode: "ADM{i}_PCODE"
+      Prnt_Pcode: "ADM{p}_PCODE"
+      Name: "ADM{i}_ES"
+      Valid_on: validOn
+    constants:
+      Language: es
+      Version: v02
+
+  SSD:
+    pcode_master: shapefile   # allows Abyei into SSD adm2
+
+  # MOZ WIA to run in newest hdx version.
+  # MOZ:
+  #   access_date: "2026-04-27" # MSNA 2026 reference (later updated in HDX)
