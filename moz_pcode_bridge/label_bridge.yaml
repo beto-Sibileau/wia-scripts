@@ -1,0 +1,45 @@
+# Label-based bridge MOZ adm2: v1 (MSNA, April 2026 download) -> v2 (current HDX)
+# Step 1: run label_bridge.py; units without a name match within the
+#         tolerance are listed in label_bridge_review.csv (with the closest
+#         candidate and its score).
+# Step 2: decide here (manual pairs or not_in_v2) and run again.
+
+fuzzy_threshold: 0.90        # similarity (0-1) of names for "name_fuzzy"
+
+# v1 adm1 name -> v2 adm1 name, when the province names differ beyond the tolerance
+province_aliases:
+  Maputo City: Cidade de Maputo
+
+# Manual pairs (override the name matching). reason: name_fuzzy | shape_analysis
+manual:
+  - v1: MZ0601                 # Cidade De Maputo
+    v2: [MZ1101, MZ1102, MZ1103, MZ1104, MZ1105, MZ1106, MZ1107]
+    reason: shape_analysis
+    note: >-
+      Maputo City split into 7 districts in v2; an MSNA value in MZ0601
+      could be imputed into each of them.
+  - v1: MZ0719                 # Nacala
+    v2: [MZ0317]               # Nacala Porto
+    reason: name_fuzzy
+  - v1: MZ1015                 # Zumbu
+    v2: [MZ0513]               # Zumbo
+    reason: name_fuzzy
+
+# v1 units with no v2 counterpart
+not_in_v2:
+  MZ0804: Malawi exclave (island in Lake Niassa); not part of Mozambique in v2.
+  MZ0805: Malawi exclave (island in Lake Niassa); not part of Mozambique in v2.
+  MZ0807: >-
+    Water of Lake Niassa inside Mozambique (down to boundary with Malawi
+    along the lake). Unpopulated area mostly merged with Lago (MZ0103) in v2.
+  MZ1112: >-
+    Maquival is part of v2 Quelimane (MZ0401). If MZ1112 appears in MSNA,
+    combine it with Cidade De Quelimane (MZ1103) into MZ0401, e.g. using
+    population weights, instead of copying MZ1103 alone.
+
+# Notes on pairs found by name matching (keyed by v1 P-code)
+notes:
+  MZ1103: >-
+    v2 Quelimane (MZ0401) also covers v1 Maquival (MZ1112). If MZ1112 appears in MSNA,
+    use a weighted mean of MZ1103 and MZ1112 (e.g. based on population) for
+    MZ0401 instead of MZ1103 alone.
